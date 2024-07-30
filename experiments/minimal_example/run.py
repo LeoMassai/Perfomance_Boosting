@@ -106,7 +106,7 @@ for epoch in range(1 + args.epochs):
 
     # print info
     if epoch % args.log_epoch == 0:
-        msg = 'Epoch: %i --- train loss: %i --- gamma%.2f' % (epoch, loss, ctl.r_ren.gamma)
+        msg = 'Epoch: %i --- train loss: %i --- gamma %.2f' % (epoch, loss, torch.abs(ctl.r_ren.gamma).detach)
 
         if args.return_best:
             # rollout the current controller on the valid data
@@ -123,7 +123,7 @@ for epoch in range(1 + args.epochs):
                 best_params = ctl.get_parameters_as_vector()  # record state dict if best on valid
                 msg += ' (best so far)'
         duration = time.time() - t
-        msg += ' ---||--- time: %.0f s' % (duration)
+        msg += ' ---||--- time: %.0f s' % duration
         logger.info(msg)
         t = time.time()
 
