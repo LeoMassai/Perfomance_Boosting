@@ -36,7 +36,7 @@ class REN(nn.Module):
         self.B2_shape = (dim_internal, dim_in)
         # nn output
         self.C2_shape = (dim_out, dim_internal)
-        #self.D21_shape = (self.dim_out, self.dim_l)
+        self.D21_shape = (dim_out, dim_nl)  #set to 0 if Networked REN
         self.D22_shape = (dim_out, dim_in)
         # v signal
         self.D12_shape = (dim_nl, dim_in)
@@ -45,7 +45,7 @@ class REN(nn.Module):
         self.Y3_shape = (min(dim_out, dim_in), min(dim_out, dim_in))
         self.gamma_shape = (1, 1)
 
-        self.training_param_names = ['X', 'Y', 'B2', 'C2', 'Z3', 'X3', 'Y3', 'D12']
+        self.training_param_names = ['X', 'Y', 'B2', 'C2', 'Z3', 'X3', 'Y3', 'D12', 'D21']
 
         # Optionally define a trainable gamma
         if self.gammat is None:
@@ -69,7 +69,7 @@ class REN(nn.Module):
         self.register_buffer('zeros_mask_R', torch.zeros(dim_in, dim_in))
         self.register_buffer('zeros_mask_so', torch.zeros(dim_internal, dim_out))
         self.register_buffer('eye_mask_w', torch.eye(dim_nl))
-        self.register_buffer('D21', torch.zeros(dim_out, dim_nl))
+        #self.register_buffer('D21', torch.zeros(dim_out, dim_nl)) #set to 0 if Networked REN
 
         # initialize internal state
         if internal_state_init is None:
