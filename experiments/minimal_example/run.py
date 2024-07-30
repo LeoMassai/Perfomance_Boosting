@@ -106,7 +106,7 @@ for epoch in range(1 + args.epochs):
 
     # print info
     if epoch % args.log_epoch == 0:
-        msg = 'Epoch: %i --- train loss: %i --- gamma %.2f' % (epoch, loss, torch.abs(ctl.r_ren.gamma).detach)
+        msg = 'Epoch: %i --- train loss: %i --- gamma %.2f' % (epoch, loss, torch.abs(ctl.r_ren.gamma))
 
         if args.return_best:
             # rollout the current controller on the valid data
@@ -148,7 +148,7 @@ with torch.no_grad():
     )  # use the entire train data, not a batch
     # evaluate losses
     loss = loss_fn.forward(x_log, u_log)
-    msg = 'Loss: %.4f' % (loss)
+    msg = 'Loss: %.4f' % loss
 # count collisions
 if args.col_av:
     num_col = loss_fn.count_collisions(x_log)
@@ -164,7 +164,7 @@ with torch.no_grad():
     )
     # loss
     test_loss = loss_fn.forward(x_log, u_log).item()
-    msg = "Loss: %.4f" % (test_loss)
+    msg = "Loss: %.4f" % test_loss
 # count collisions
 if args.col_av:
     num_col = loss_fn.count_collisions(x_log)

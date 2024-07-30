@@ -38,14 +38,16 @@ def argument_parser():
     parser.add_argument('--log-epoch', type=int, default=-1, help='Frequency of logging in epochs. Default is 0.1 * epochs.')
     parser.add_argument('--return-best', type=bool, default=True, help='Return the best model on the validation data among all logged iterations. The train data can be used instead of validation data. The Default is True.')
 
-    # TODO: add the following
-    # parser.add_argument('--patience-epoch', type=int, default=None, help='Patience epochs for no progress. Default is None which sets it to 0.2 * total_epochs.')
-    # parser.add_argument('--lr-start-factor', type=float, default=1.0, help='Start factor of the linear learning rate scheduler. Default is 1.0.')
-    # parser.add_argument('--lr-end-factor', type=float, default=0.01, help='End factor of the linear learning rate scheduler. Default is 0.01.')
-    # # save/load args
-    # parser.add_argument('--experiment-dir', type=str, default='boards', help='Name tag for the experiments. By default it will be the "boards" folder.')
-    # parser.add_argument('--load-model', type=str, default=None, help='If it is not set to None, a pretrained model will be loaded instead of training.')
-    # parser.add_argument('--device', type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help='Device to run the computations on, "cpu" or "cuda:0". Default is "cuda:0" if available, otherwise "cpu".')
+    # TODO: add the following parser.add_argument('--patience-epoch', type=int, default=None, help='Patience epochs
+    #  for no progress. Default is None which sets it to 0.2 * total_epochs.') parser.add_argument(
+    #  '--lr-start-factor', type=float, default=1.0, help='Start factor of the linear learning rate scheduler.
+    #  Default is 1.0.') parser.add_argument('--lr-end-factor', type=float, default=0.01, help='End factor of the
+    #  linear learning rate scheduler. Default is 0.01.') # save/load args parser.add_argument('--experiment-dir',
+    #  type=str, default='boards', help='Name tag for the experiments. By default it will be the "boards" folder.')
+    #  parser.add_argument('--load-model', type=str, default=None, help='If it is not set to None, a pretrained model
+    #  will be loaded instead of training.') parser.add_argument('--device', type=str, default="cuda:0" if
+    #  torch.cuda.is_available() else "cpu", help='Device to run the computations on, "cpu" or "cuda:0". Default is
+    #  "cuda:0" if available, otherwise "cpu".')
 
     args = parser.parse_args()
 
@@ -54,13 +56,13 @@ def argument_parser():
         args.batch_size = args.num_rollouts  # use all train data
 
     if args.epochs == -1 or args.epochs is None:
-        args.epochs = 1000 if args.col_av else 50
+        args.epochs = 5 if args.col_av else 50
 
     if args.lr == -1 or args.lr is None:
         args.lr = 2e-3 if args.col_av else 5e-3
 
     if args.log_epoch == -1 or args.log_epoch is None:
-        args.log_epoch = math.ceil(float(args.epochs)/10)
+        args.log_epoch = math.ceil(float(args.epochs)/1)
 
     # assertions and warning
     if not args.col_av:

@@ -125,7 +125,7 @@ class PerfBoostController(nn.Module):
 
     def get_parameters_as_vector(self):
         # TODO: implement without numpy
-        return np.concatenate([p.detach().clone().cpu().numpy().flatten() for p in self.r_ren.parameters()])
+        return torch.cat([torch.flatten(p) for p in self.r_ren.parameters()])
 
     def set_parameter(self, name, value):
         current_val = getattr(self.r_ren, name)

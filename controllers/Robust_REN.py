@@ -80,9 +80,9 @@ class REN(nn.Module):
         self.register_buffer('init_x', self.x.detach().clone())
 
         # Auxiliary elements
-        self.set_param()
+        self._update_model_param()
 
-    def set_param(self, gamman=None):
+    def _update_model_param(self, gamman=None):
         if gamman is not None:
             self.gamma = gamman
         gamma = torch.abs(self.gamma)
@@ -138,7 +138,7 @@ class REN(nn.Module):
         #self.P = torch.matmul(self.E.T, torch.matmul(torch.inverse(self.P_cal), self.E))
 
     def forward(self, u):
-        self.set_param()
+        self._update_model_param()
         decay_rate = 0.95
         batch_size = u.shape[0]
         w = torch.zeros(batch_size, 1, self.dim_nl, device=u.device)
