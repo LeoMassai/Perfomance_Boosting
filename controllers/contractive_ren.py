@@ -8,7 +8,7 @@ class ContractiveREN(nn.Module):
     """
     Acyclic contractive recurrent equilibrium network, following the paper:
     "Recurrent equilibrium networks: Flexible dynamic models with guaranteed
-    stability and robustness, Revay M et al. ."
+    stability and robustness, Revay M et al."
 
     The mathematical model of RENs relies on an implicit layer embedded in a recurrent layer.
     The model is described as,

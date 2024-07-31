@@ -9,9 +9,18 @@ class REN(nn.Module):
     # ## Implementation of REN model, modified from "Recurrent Equilibrium Networks: Flexible Dynamic Models with
     # Guaranteed Stability and Robustness" by Max Revay et al.
     def __init__(self, dim_in: int, dim_out: int, dim_internal: int,
-                 dim_nl: int, initialization_std: float = 0.5, internal_state_init=None, gammat=None, mode="l2stable",
+                 dim_nl: int, initialization_std: float = 0.5, internal_state_init=None, gammat=True, mode="l2stable",
                  Q=None, R=None, S=None
                  , posdef_tol: float = 0.001):
+        """
+        Args: dim_in (int): Input (u) dimension. dim_out (int): Output (y) dimension. dim_internal (int): Internal
+        state (x) dimension. dim_nl (int): Dimension of the input ( "v") and ouput ("w") of the nonlinear static
+        block. initialization_std (float, optional): Weight initialization. Set to 0.1 by default.
+        internal_state_init (torch.Tensor or None, optional): Initial condition for the internal state. Defaults to 0
+        when set to None. gammat: sets the L2 gain gamma as a trainable parameter, defaults to True. mode: controls
+        what dissipative property is enjoyed by the REN epsilon, defaults to L2 stability. (float, optional):
+        Positive and negligible scalar to force positive definite matrices.
+        """
         super().__init__()
 
         # set dimensions
@@ -47,11 +56,11 @@ class REN(nn.Module):
 
         self.training_param_names = ['X', 'Y', 'B2', 'C2', 'Z3', 'X3', 'Y3', 'D12', 'D21']
 
-        # Optionally define a trainable gamma
-        if self.gammat is None:
+        # Define trainable gamma
+        if self.gammat:
             self.training_param_names.append('gamma')
         else:
-            self.gamma = gammat
+            self.gamma = torch.randn(1)
 
         # define trainable params
 
@@ -83,15 +92,20 @@ class REN(nn.Module):
         self._update_model_param()
 
     def _update_model_param(self, gamman=None):
-        if gamman is not None:
-            self.gamma = gamman
-        gamma = torch.abs(self.gamma)
+        if self.gammat:
+            gamma = torch.abs(self.gamma)
+        else:
+            if gamman is None:
+                raise ValueError("gamma must be provided when the parameter is not trainable")
+            gamma = torch.abs(gamman)
+            self.gamma = gamma
         dim_internal, dim_nl, dim_in, dim_out = self.dim_internal, self.dim_nl, self.dim_in, self.dim_out
 
         # Updating of Q,S,R with variable gamma if needed
         self.Q, self.R, self.S = self._set_mode(self.mode, gamma, self.Q, self.R, self.S)
-        M = F.linear(self.X3.T, self.X3.T) + self.Y3 - self.Y3.T + F.linear(self.Z3.T,
-                                                                            self.Z3.T) + self.epsilon * self.eye_mask_min
+        M = (F.linear(self.X3.T, self.X3.T) + self.Y3 - self.Y3.T + F.linear(self.Z3.T,
+                                                                             self.Z3.T) + self.epsilon
+             * self.eye_mask_min)
         if dim_out >= dim_in:
             N = torch.vstack((F.linear(self.eye_mask_dim_in - M,
                                        torch.inverse(self.eye_mask_dim_in + M).T),
