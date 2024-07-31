@@ -133,7 +133,7 @@ if args.return_best:
 
 # ------ 7. Save and evaluate the trained model ------
 # save
-res_dict = ctl.c_ren.state_dict()
+res_dict = ctl.r_ren.state_dict()
 # TODO: append args
 res_dict['Q'] = Q
 filename = os.path.join(save_folder, 'trained_controller' + '.pt')

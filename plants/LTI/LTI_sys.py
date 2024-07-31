@@ -1,6 +1,7 @@
 import torch
 from utils.assistive_functions import to_tensor
 
+
 # ---------- SYSTEM ----------
 class LTISystem:
     def __init__(self, A, B, C, x_init):
@@ -33,15 +34,16 @@ class LTISystem:
             xs = torch.cat(
                 (
                     xs,
-                    torch.matmul(self.A, xs[:, t-1:t, :]) + torch.matmul(self.B, us[:, t-1:t, :]) + data[:, t:t+1, :]),
+                    torch.matmul(self.A, xs[:, t - 1:t, :]) + torch.matmul(self.B, us[:, t - 1:t, :]) + data[:, t:t + 1,
+                                                                                                        :]),
                 1
             )
             ys = torch.cat(
-                (ys, torch.matmul(self.C, xs[:, t:t+1, :])),
+                (ys, torch.matmul(self.C, xs[:, t:t + 1, :])),
                 1
             )
             us = torch.cat(
-                (us, controller.forward(xs[:, t:t+1, :])),
+                (us, controller.forward(xs[:, t:t + 1, :])),
                 1
             )
         return xs, ys, us

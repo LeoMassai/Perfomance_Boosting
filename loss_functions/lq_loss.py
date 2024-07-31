@@ -4,7 +4,7 @@ from utils.assistive_functions import to_tensor
 from config import device
 
 
-class LQLossFH():
+class LQLossFH:
     def __init__(self, Q, R, loss_bound=None, sat_bound=None, xbar=None):
         self.Q, self.R = Q, R
         self.Q = to_tensor(self.Q).to(device)

@@ -56,13 +56,13 @@ def argument_parser():
         args.batch_size = args.num_rollouts  # use all train data
 
     if args.epochs == -1 or args.epochs is None:
-        args.epochs = 5 if args.col_av else 50
+        args.epochs = 500 if args.col_av else 50
 
     if args.lr == -1 or args.lr is None:
         args.lr = 2e-3 if args.col_av else 5e-3
 
     if args.log_epoch == -1 or args.log_epoch is None:
-        args.log_epoch = math.ceil(float(args.epochs)/1)
+        args.log_epoch = math.ceil(float(args.epochs)/10)
 
     # assertions and warning
     if not args.col_av:

@@ -3,7 +3,7 @@ import torch.nn.functional as F
 
 
 class RobotsSystem(torch.nn.Module):
-    def __init__(self, xbar: torch.Tensor, linear_plant: bool, x_init=None, u_init=None, k: float=1.0):
+    def __init__(self, xbar: torch.Tensor, linear_plant: bool, x_init=None, u_init=None, k: float = 1.0):
         """
 
         Args:
@@ -20,14 +20,15 @@ class RobotsSystem(torch.nn.Module):
 
         # initial state
         self.register_buffer('xbar', xbar.reshape(1, -1))  # shape = (1, state_dim)
-        x_init = self.xbar.detach().clone() if x_init is None else x_init.reshape(1, -1)   # shape = (1, state_dim)
+        x_init = self.xbar.detach().clone() if x_init is None else x_init.reshape(1, -1)  # shape = (1, state_dim)
         self.register_buffer('x_init', x_init)
-        u_init = torch.zeros(1, int(self.xbar.shape[1]/2)) if u_init is None else u_init.reshape(1, -1)   # shape = (1, in_dim)
+        u_init = torch.zeros(1, int(self.xbar.shape[1] / 2)) if u_init is None else u_init.reshape(1,
+                                                                                                   -1)  # shape = (1, in_dim)
         self.register_buffer('u_init', u_init)
         # check dimensions
-        self.n_agents = int(self.xbar.shape[1]/4)
-        self.state_dim = 4*self.n_agents
-        self.in_dim = 2*self.n_agents
+        self.n_agents = int(self.xbar.shape[1] / 4)
+        self.state_dim = 4 * self.n_agents
+        self.in_dim = 2 * self.n_agents
         assert self.xbar.shape[1] == self.state_dim and self.x_init.shape[1] == self.state_dim
         assert self.u_init.shape[1] == self.in_dim
 
@@ -40,19 +41,19 @@ class RobotsSystem(torch.nn.Module):
         B = torch.kron(torch.eye(self.n_agents),
                        torch.tensor([[0, 0],
                                      [0., 0],
-                                     [1/m, 0],
-                                     [0, 1/m]])
+                                     [1 / m, 0],
+                                     [0, 1 / m]])
                        ) * self.h
         self.register_buffer('B', B)
 
-        _A1 = torch.eye(4*self.n_agents)
-        _A2 = torch.cat((torch.cat((torch.zeros(2,2),
-                                torch.eye(2)
-                                ), dim=1),
-                        torch.cat((torch.diag(torch.tensor([-self.k/self.mass, -self.k/self.mass])),
-                                   torch.diag(torch.tensor([-self.b/self.mass, -self.b/self.mass]))
-                                   ), dim=1),
-                        ), dim=0)
+        _A1 = torch.eye(4 * self.n_agents)
+        _A2 = torch.cat((torch.cat((torch.zeros(2, 2),
+                                    torch.eye(2)
+                                    ), dim=1),
+                         torch.cat((torch.diag(torch.tensor([-self.k / self.mass, -self.k / self.mass])),
+                                    torch.diag(torch.tensor([-self.b / self.mass, -self.b / self.mass]))
+                                    ), dim=1),
+                         ), dim=0)
         _A2 = torch.kron(torch.eye(self.n_agents), _A2)
         A_lin = _A1 + self.h * _A2
         self.register_buffer('A_lin', A_lin)
@@ -64,15 +65,15 @@ class RobotsSystem(torch.nn.Module):
         assert not self.linear_plant
         A3 = torch.norm(
             x.view(-1, 2 * self.n_agents, 2) * self.mask, dim=-1, keepdim=True
-        )           # shape = (batch_size, 2 * n_agents, 1)
+        )  # shape = (batch_size, 2 * n_agents, 1)
         A3 = torch.kron(
             A3, torch.ones(2, 1, device=A3.device)
-        )           # shape = (batch_size, 4 * n_agents, 1)
+        )  # shape = (batch_size, 4 * n_agents, 1)
         A3 = -self.b2 / self.mass * torch.diag_embed(
             A3.squeeze(dim=-1), offset=0, dim1=-2, dim2=-1
-        )           # shape = (batch_size, 4 * n_agents, 4 * n_agents)
+        )  # shape = (batch_size, 4 * n_agents, 4 * n_agents)
         A = self.A_lin + self.h * A3
-        return A    # shape = (batch_size, 4 * n_agents, 4 * n_agents)
+        return A  # shape = (batch_size, 4 * n_agents, 4 * n_agents)
 
     def noiseless_forward(self, t, x: torch.Tensor, u: torch.Tensor):
         """
@@ -92,8 +93,8 @@ class RobotsSystem(torch.nn.Module):
             f = F.linear(x - self.xbar, self.A_lin) + F.linear(u, self.B) + self.xbar
         else:
             # A depends on x, hence is batched. perform batched matrix multiplication
-            f = torch.bmm(x - self.xbar, self.A_nonlin(x).transpose(1,2)) + F.linear(u, self.B) + self.xbar
-        return f    # shape = (batch_size, 1, state_dim)
+            f = torch.bmm(x - self.xbar, self.A_nonlin(x).transpose(1, 2)) + F.linear(u, self.B) + self.xbar
+        return f  # shape = (batch_size, 1, state_dim)
 
     def forward(self, t, x, u, w):
         """
@@ -130,8 +131,8 @@ class RobotsSystem(torch.nn.Module):
 
         # Simulate
         for t in range(data.shape[1]):
-            x = self.forward(t=t, x=x, u=u, w=data[:, t:t+1, :])    # shape = (batch_size, 1, state_dim)
-            u = controller(x)                                       # shape = (batch_size, 1, in_dim)
+            x = self.forward(t=t, x=x, u=u, w=data[:, t:t + 1, :])  # shape = (batch_size, 1, state_dim)
+            u = controller(x)  # shape = (batch_size, 1, in_dim)
 
             if t == 0:
                 x_log, u_log = x, u
